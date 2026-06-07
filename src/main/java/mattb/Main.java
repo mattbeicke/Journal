@@ -1,3 +1,5 @@
+package mattb;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -19,27 +21,27 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         LocalDate date = LocalDate.now();
-        String fileName = "Journals\\" + date.format(DateTimeFormatter.ofPattern("MMddyyyy")) + ".txt";
-        File file = new File(fileName);
+        String dateFileName = "Journals\\" + date.format(DateTimeFormatter.ofPattern("MMddyyyy")) + ".txt";
+        File file = new File(dateFileName);
         TextArea text = new TextArea();
         if (file.exists()) {
             try {
-                BufferedReader reader = new BufferedReader(new FileReader(fileName));
+                BufferedReader reader = new BufferedReader(new FileReader(dateFileName));
                 String line;
-                String data = "";
+                StringBuilder data = new StringBuilder();
                 while ((line = reader.readLine()) != null) {
-                    data += line + "\n";
+                    data.append(line).append("\n");
                 }
-                text.setText(data);
+                text.setText(data.toString());
             } catch (IOException ignored) {
             }
         }
         Button done = new Button("Done");
         AtomicBoolean viewing = new AtomicBoolean(false);
-        done.setOnAction(e -> {
+        done.setOnAction(_ -> {
             if (!viewing.get()) {
                 try {
-                    FileWriter toFile = new FileWriter(fileName);
+                    FileWriter toFile = new FileWriter(dateFileName);
                     toFile.write(text.getText());
                     toFile.close();
                 } catch (IOException ignored) {
@@ -48,26 +50,26 @@ public class Main extends Application {
             Platform.exit();
         });
         Button viewer = new Button(" View\nEntries");
-        viewer.setOnAction(e -> {
+        viewer.setOnAction(_ -> {
             viewing.set(true);
             File directory = new File("Journals\\");
             File[] files = directory.listFiles();
-            VBox fnames = new VBox();
+            VBox fileNames = new VBox();
             if (files != null) {
                 for (File f : files) {
-                    String fname = f.getPath().substring(f.getPath().indexOf("\\") + 1, f.getPath().indexOf('.'));
-                    Button b = new Button("    " + fname + "    ");
-                    b.setOnAction(g -> {
+                    String fileName = f.getPath().substring(f.getPath().indexOf("\\") + 1, f.getPath().indexOf('.'));
+                    Button b = new Button("    " + fileName + "    ");
+                    b.setOnAction(_ -> {
                         try {
                             BufferedReader reader = new BufferedReader(new FileReader(f.getPath()));
                             String line;
-                            String data = "";
+                            StringBuilder data = new StringBuilder();
                             while ((line = reader.readLine()) != null) {
-                                data += line + "\n";
+                                data.append(line).append("\n");
                             }
-                            text.setText(data);
+                            text.setText(data.toString());
                             text.setEditable(false);
-                            Label dat = new Label("Viewing entry from: "+fname.substring(0,2)+"/"+fname.substring(2,4)+"/"+fname.substring(4));
+                            Label dat = new Label("Viewing entry from: " + fileName.substring(0, 2) + "/" + fileName.substring(2, 4) + "/" + fileName.substring(4));
                             BorderPane rute = new BorderPane(text, dat, done, new Label(), new Label("     "));
                             BorderPane.setAlignment(dat, Pos.CENTER);
                             Scene view = new Scene(rute, 1000, 500);
@@ -76,10 +78,10 @@ public class Main extends Application {
                         } catch (IOException ignored) {
                         }
                     });
-                    fnames.getChildren().add(b);
+                    fileNames.getChildren().add(b);
                 }
             }
-            Scene past = new Scene(fnames);
+            Scene past = new Scene(fileNames);
             primaryStage.setScene(past);
             primaryStage.show();
         });
@@ -91,9 +93,5 @@ public class Main extends Application {
         primaryStage.setTitle("Journal");
         primaryStage.setScene(scene);
         primaryStage.show();
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }
